@@ -1,0 +1,98 @@
+# Import necessary libraries
+
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, precision_score, recall_score
+from imblearn.over_sampling import SMOTE
+
+df = pd.read_csv('credit.csv')
+df
+df.head()
+df.tail()
+df.dropna()
+df.isnull()
+
+#creating bar graph
+x=df["Gender"].value_counts()
+x.index=["Female","Male"]
+x.plot(kind="bar",color="skyblue")
+plt.title("Credit Card Fraud")
+plt.xlabel("Gender")
+plt.ylabel("Frequency")
+plt.show()
+
+#creating pie chart
+x=df["Domain"].value_counts()
+x.index=["Local","International"]
+x.plot(kind="pie",autopct="%1.1f%%",color="teal")
+plt.title("Credit Card")
+plt.xlabel("Gender")
+plt.ylabel("Frequency")
+plt.show()
+
+# Create the histogram
+plt.figure(figsize=(10,6))
+plt.hist(df['Amount'], bins=30, color='skyblue', edgecolor='black')
+# Add titles and labels
+plt.title('Distribution of Transaction Amounts')
+plt.xlabel('Transaction Amount')
+plt.ylabel('Frequency')
+# Show the plot
+plt.show()
+
+# Preprocessing: Check for missing values
+print(df.isnull().sum())
+
+df_encoded = pd.get_dummies(df, drop_first=True)
+X = df.drop('Outcome', axis=1)       # Excluding the target column 
+y = df['Outcome']            # Target variable 
+
+# Initialize the scaler
+scaler = StandardScaler()
+
+# Scale numerical features
+numerical_features = ["AcountNumber", "CVV", "CustomerAge", "Amount", "AverageIncomeExpendicture"]
+scaler = StandardScaler()
+X[numerical_features] = scaler.fit_transform(X[numerical_features])
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Encode categorical variables
+
+categorical_features = ["Gender", "Marital Status", "CardColour", "CardType", "Domain", "Customer_City_Address"]
+for feature in categorical_features:
+    encoder = LabelEncoder()
+    X[feature] = encoder.fit_transform(X[feature])
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train the Random Forest model
+
+rf_model = RandomForestClassifier(random_state=42)
+rf_model.fit(X_train, y_train)
+
+# Make predictions on the test set
+
+y_pred = rf_model.predict(X_test)
+print(y_pred)
+
+# Calculate evaluation metrics
+
+confusion = confusion_matrix(y_test, y_pred)
+accuracy = accuracy_score(y_test, y_pred)
+precision = precision_score(y_test, y_pred)
+recall = recall_score(y_test, y_pred)
+
+# Print the evaluation metrics
+
+print("Confusion Matrix:")
+print(confusion)
+print("Accuracy:", accuracy)
+print("Precision:", precision)
+print("Recall:", recall)
